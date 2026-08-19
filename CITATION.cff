@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software in your research or project, please cite it as below."
+title: "Sign Language Interpreter: Real-Time Multimodal ASL Recognition and Sensor Fusion Platform"
+abstract: "An open-source assistive human-computer interaction system combining computer vision landmark tracking, on-device deep learning neural networks, and ESP32 IMU smart glove sensor fusion for real-time sign language recognition and translation."
+version: 1.0.0
+date-released: 2026-08-20
+license: MIT
+repository-code: "https://github.com/rudy-07/Sign-Language-Interpreter"
+authors:
+  - family-names: "Shekhar"
+    given-names: "Rudransh"
+keywords:
+  - sign-language
+  - sign-language-recognition
+  - computer-vision
+  - mediapipe
+  - tensorflow-js
+  - esp32
+  - mpu6050
+  - sensor-fusion
+  - assistive-technology
+  - human-computer-interaction

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL Alphabet Detector — Real-time Sign Language Translation</title>
+    <meta name="description"
+        content="Real-time American Sign Language alphabet detection using AI and computer vision. Translate signs to text and speech in multiple languages.">
+
+    <!-- Modern Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- MediaPipe Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <!-- TensorFlow.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- ==================== HEADER ==================== -->
+        <header class="glass-panel">
+            <div class="header-inner">
+                <div class="header-left">
+                    <span class="header-icon">🤟</span>
+                    <div class="header-titles">
+                        <h1>ASL <span class="highlight">Alphabet</span></h1>
+                        <p>Real-time Sign Language Translation</p>
+                    </div>
+                </div>
+                <nav class="nav-menu">
+                    <a href="index.html" class="nav-link active">📷 Alphabet Detector</a>
+                    <a href="chat.html" class="nav-link">🤖 AI Chatbot</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- ==================== MAIN GRID ==================== -->
+        <main class="vision-container">
+
+            <!-- ===== LEFT COLUMN (65%) — Camera + Detected Sign ===== -->
+            <div class="left-column">
+
+                <!-- Camera Feed -->
+                <div class="camera-wrapper glass-panel" id="camera-container">
+                    <video id="webcam" autoplay playsinline muted></video>
+                    <canvas class="output_canvas" id="output_canvas"></canvas>
+
+                    <!-- Camera Status Badges -->
+                    <div class="camera-status-bar">
+                        <div class="camera-badge"><span class="dot"></span> LIVE</div>
+                        <div class="camera-badge" id="fps-badge">FPS: --</div>
+                    </div>
+
+                    <!-- Loading Overlay -->
+                    <div class="status-overlay" id="status-overlay">
+                        <div class="loader"></div>
+                        <p id="status-text">Initializing Camera & AI...</p>
+                    </div>
+                </div>
+
+                <!-- Detected Sign (below camera) -->
+                <div class="result-panel glass-panel">
+                    <div class="letter-display" id="letter-display-el">
+                        <span id="detected-letter">-</span>
+                    </div>
+                    <div class="detection-info">
+                        <h2 class="section-title">
+                            <span class="section-icon">✋</span> Detected Sign
+                        </h2>
+                        <div class="confidence-bar-wrapper">
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidence-fill"></div>
+                            </div>
+                            <span class="confidence-text" id="confidence-text">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ===== RIGHT COLUMN (35%) — Glove / Sentence / Training ===== -->
+            <div class="side-panel">
+
+                <!-- Smart Glove Status -->
+                <div class="hardware-panel glass-panel">
+                    <h2 class="section-title"><span class="section-icon">🧤</span> Smart Glove Status</h2>
+                    <div class="hardware-controls">
+                        <button id="connect-ble-btn" class="btn primary">Connect Glove 📡</button>
+                        <span id="ble-status" class="status-badge disconnected">Disconnected</span>
+                    </div>
+                    <div class="data-grid">
+                        <div class="data-box">
+                            <span class="data-icon">🔄</span>
+                            <span class="data-label">Roll</span>
+                            <span class="data-value" id="glove-roll">0.0°</span>
+                        </div>
+                        <div class="data-box">
+                            <span class="data-icon">📐</span>
+                            <span class="data-label">Pitch</span>
+                            <span class="data-value" id="glove-pitch">0.0°</span>
+                        </div>
+                    </div>
+                    <div class="debug-divider">
+                        <div class="data-grid">
+                            <div class="data-box small">
+                                <span class="data-label">Pitch Δ</span>
+                                <span class="data-value" id="debug-pitch-delta">0.0</span>
+                            </div>
+                            <div class="data-box small">
+                                <span class="data-label">Roll Δ</span>
+                                <span class="data-value" id="debug-roll-delta">0.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sentence Builder -->
+                <div class="sentence-panel glass-panel">
+                    <h2 class="section-title"><span class="section-icon">💬</span> Sentence Builder</h2>
+
+                    <div id="sentence-display">
+                        <!-- Word tags appear here -->
+                    </div>
+
+                    <p class="sentence-instructions">
+                        Letters are typed <strong>Instantly!</strong> (Continuous Stream)<br>
+                        <em>To type a double letter (e.g. LL), briefly drop your hand.</em><br>
+                        Keyboard: <kbd>Space</kbd> for Space, <kbd>Backspace</kbd> to Delete.
+                    </p>
+
+                    <div class="sentence-controls">
+                        <button id="clear-sentence-btn" class="btn danger" style="flex: 1;">🗑️ Clear</button>
+                        <button id="speak-sentence-btn" class="btn success" style="flex: 2;">🔊 Speak</button>
+                    </div>
+
+                    <!-- Translation -->
+                    <div style="border-top: 1px solid var(--panel-border); padding-top: 12px; margin-top: 4px;">
+                        <h3 class="section-title" style="font-size: 0.78rem;"><span class="section-icon">🌐</span>
+                            Translate & Speak</h3>
+                        <div class="translation-controls">
+                            <select id="translate-lang">
+                                <option value="ta">🇮🇳 Tamil</option>
+                                <option value="hi">🇮🇳 Hindi</option>
+                                <option value="es">🇪🇸 Spanish</option>
+                                <option value="fr">🇫🇷 French</option>
+                                <option value="de">🇩🇪 German</option>
+                                <option value="ja">🇯🇵 Japanese</option>
+                                <option value="ko">🇰🇷 Korean</option>
+                                <option value="zh-CN">🇨🇳 Chinese</option>
+                                <option value="ar">🇸🇦 Arabic</option>
+                                <option value="pt">🇧🇷 Portuguese</option>
+                                <option value="ru">🇷🇺 Russian</option>
+                                <option value="te">🇮🇳 Telugu</option>
+                                <option value="ml">🇮🇳 Malayalam</option>
+                                <option value="kn">🇮🇳 Kannada</option>
+                            </select>
+                            <button id="translate-btn" class="btn translate-btn">Translate</button>
+                            <button id="speak-translated-btn" class="btn success"
+                                style="padding: 10px 14px;">🔊</button>
+                        </div>
+                        <div id="translated-output" style="margin-top: 8px; display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Manual Training -->
+                <div class="training-panel glass-panel">
+                    <h2 class="section-title"><span class="section-icon">🧠</span> Manual Training</h2>
+                    <p class="desc">Is a letter not detecting well? Teach the AI your hand shape to override the default
+                        model.</p>
+
+                    <div class="train-controls">
+                        <select id="train-class">
+                            <option value="A">Letter A</option>
+                            <option value="B">Letter B</option>
+                            <option value="C">Letter C</option>
+                            <option value="D">Letter D</option>
+                            <option value="E">Letter E</option>
+                            <option value="F">Letter F</option>
+                            <option value="G">Letter G</option>
+                            <option value="H">Letter H</option>
+                            <option value="I">Letter I</option>
+                            <option value="J">Letter J</option>
+                            <option value="K">Letter K</option>
+                            <option value="L">Letter L</option>
+                            <option value="M">Letter M</option>
+                            <option value="N">Letter N</option>
+                            <option value="O">Letter O</option>
+                            <option value="P">Letter P</option>
+                            <option value="Q">Letter Q</option>
+                            <option value="R">Letter R</option>
+                            <option value="S">Letter S</option>
+                            <option value="T">Letter T</option>
+                            <option value="U">Letter U</option>
+                            <option value="V">Letter V</option>
+                            <option value="W">Letter W</option>
+                            <option value="X">Letter X</option>
+                            <option value="Y">Letter Y</option>
+                            <option value="Z">Letter Z</option>
+                        </select>
+                        <button id="add-example-btn" class="btn primary">📸 Capture Frame</button>
+                    </div>
+
+                    <div class="stats">
+                        <p>Overrides: <strong><span id="example-count">0</span></strong> frames</p>
+                        <button id="clear-data-btn" class="btn danger">Clear Data</button>
+                    </div>
+
+                    <div class="storage-controls">
+                        <button id="save-model-btn" class="btn secondary" style="flex:1;">💾 Save</button>
+                        <button id="load-model-btn" class="btn secondary" style="flex:1;">📂 Load</button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- ==================== FOOTER STATUS BAR ==================== -->
+        <footer class="footer-status glass-panel">
+            <div class="footer-item">
+                <span class="dot-indicator" id="footer-camera-dot"></span>
+                Camera: <strong id="footer-camera-status">Starting</strong>
+            </div>
+            <span class="footer-separator"></span>
+            <div class="footer-item">
+                <span class="dot-indicator" id="footer-model-dot"></span>
+                Model: <strong id="footer-model-status">Loading</strong>
+            </div>
+            <span class="footer-separator"></span>
+            <div class="footer-item">
+                FPS: <strong id="footer-fps">--</strong>
+            </div>
+            <span class="footer-separator"></span>
+            <div class="footer-item">
+                <span class="dot-indicator disconnected" id="footer-glove-dot"
+                    style="background: var(--danger-color); box-shadow: 0 0 6px var(--danger-glow);"></span>
+                Glove: <strong id="footer-glove-status">Off</strong>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+    <script src="script.js?v=9"></script>
+</body>
+
+</html>

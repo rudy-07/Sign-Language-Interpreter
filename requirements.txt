@@ -1,0 +1,18 @@
+# Core Machine Learning & Data Processing
+numpy>=1.23.0
+pandas>=1.5.0
+scikit-learn>=1.2.0
+
+# Deep Learning (Optional for offline training)
+tensorflow>=2.11.0
+
+# Computer Vision & Landmark Tracking (Standalone Python pipeline)
+opencv-python>=4.7.0
+mediapipe>=0.10.0
+
+# Bluetooth Low Energy Telemetry (Standalone Python receiver)
+bleak>=0.20.0
+
+# Visualization & Utilities
+matplotlib>=3.6.0
+seaborn>=0.12.0

@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sign-language-interpreter"
+version = "1.0.0"
+authors = [
+  { name = "Rudransh Shekhar", email = "rudransh@example.com" },
+]
+description = "Real-time multimodal ASL sign language recognition, sensor fusion, and translation platform."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Human Machine Interfaces",
+]
+dependencies = [
+    "numpy>=1.23.0",
+    "pandas>=1.5.0",
+    "scikit-learn>=1.2.0",
+]
+
+[project.optional-dependencies]
+vision = [
+    "opencv-python>=4.7.0",
+    "mediapipe>=0.10.0",
+]
+deeplearning = [
+    "tensorflow>=2.11.0",
+]
+ble = [
+    "bleak>=0.20.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "flake8>=6.0.0",
+    "black>=23.0.0",
+]

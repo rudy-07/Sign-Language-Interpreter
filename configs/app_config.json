@@ -1,0 +1,113 @@
+{
+  "project": {
+    "name": "Sign-Language-Interpreter",
+    "version": "1.0.0",
+    "description": "Real-Time Multimodal Sign Language Recognition & Translation System",
+    "authors": ["rudy-07"],
+    "license": "MIT"
+  },
+  "camera": {
+    "defaultWidth": 640,
+    "defaultHeight": 480,
+    "facingMode": "user",
+    "targetFps": 30
+  },
+  "vision": {
+    "framework": "MediaPipe Hands",
+    "maxNumHands": 1,
+    "modelComplexity": 1,
+    "minDetectionConfidence": 0.7,
+    "minTrackingConfidence": 0.5,
+    "numLandmarks": 21,
+    "numFeatures": 42
+  },
+  "model": {
+    "architecture": "Sequential",
+    "inputDim": 42,
+    "layers": [
+      { "type": "Dense", "units": 256, "activation": "relu" },
+      { "type": "BatchNormalization" },
+      { "type": "Dropout", "rate": 0.3 },
+      { "type": "Dense", "units": 128, "activation": "relu" },
+      { "type": "BatchNormalization" },
+      { "type": "Dropout", "rate": 0.2 },
+      { "type": "Dense", "units": 64, "activation": "relu" },
+      { "type": "Dense", "units": 26, "activation": "softmax" }
+    ],
+    "training": {
+      "epochs": 20,
+      "batchSize": 256,
+      "optimizer": "adam",
+      "loss": "categoricalCrossentropy"
+    },
+    "storage": {
+      "indexedDbKey": "indexeddb://asl-alphabet-model",
+      "datasetPath": "models/keypoint.csv"
+    }
+  },
+  "inference": {
+    "confidenceThreshold": 0.60,
+    "requiredConsecutiveFrames": 3,
+    "detectionCooldownMs": 300,
+    "knnOverrideConfidence": 0.70
+  },
+  "hardware": {
+    "device": "ESP32 Dev Module + MPU-6050",
+    "communication": "Web Bluetooth Low Energy (BLE)",
+    "samplingRateHz": 50,
+    "loopIntervalMs": 20,
+    "filterAlpha": 0.85,
+    "ble": {
+      "deviceName": "MPU6050_Glove",
+      "serviceUuid": "0000ffe0-0000-1000-8000-00805f9b34fb",
+      "characteristicUuid": "0000ffe1-0000-1000-8000-00805f9b34fb"
+    },
+    "i2c": {
+      "sdaPin": "GPIO21",
+      "sclPin": "GPIO22",
+      "clockSpeedHz": 100000
+    },
+    "heuristics": {
+      "historyBufferSize": 10,
+      "space": {
+        "maxPitchDeviation": 20.0,
+        "minRollAbsolute": 150.0
+      },
+      "yes": {
+        "minPitchDeviation": 25.0,
+        "maxReturnDelta": 15.0,
+        "cooldownMs": 2000
+      },
+      "hello": {
+        "minRollDelta": 40.0,
+        "cooldownMs": 2000
+      },
+      "j": {
+        "minPitchDeltaFirstHalf": 40.0,
+        "minRollDeltaSecondHalf": 40.0
+      },
+      "z": {
+        "minPitchDelta": 20.0
+      }
+    }
+  },
+  "languages": {
+    "defaultSource": "en",
+    "supportedTargets": [
+      { "code": "ta", "name": "Tamil", "speechCode": "ta-IN" },
+      { "code": "hi", "name": "Hindi", "speechCode": "hi-IN" },
+      { "code": "es", "name": "Spanish", "speechCode": "es-ES" },
+      { "code": "fr", "name": "French", "speechCode": "fr-FR" },
+      { "code": "de", "name": "German", "speechCode": "de-DE" },
+      { "code": "ja", "name": "Japanese", "speechCode": "ja-JP" },
+      { "code": "ko", "name": "Korean", "speechCode": "ko-KR" },
+      { "code": "zh-CN", "name": "Chinese (Simplified)", "speechCode": "zh-CN" },
+      { "code": "ar", "name": "Arabic", "speechCode": "ar-SA" },
+      { "code": "pt", "name": "Portuguese", "speechCode": "pt-BR" },
+      { "code": "ru", "name": "Russian", "speechCode": "ru-RU" },
+      { "code": "te", "name": "Telugu", "speechCode": "te-IN" },
+      { "code": "ml", "name": "Malayalam", "speechCode": "ml-IN" },
+      { "code": "kn", "name": "Kannada", "speechCode": "kn-IN" }
+    ]
+  }
+}
