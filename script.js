@@ -141,8 +141,8 @@ async function connectToBluetooth() {
         bleStatusEl.innerText = 'Connected';
         bleStatusEl.classList.remove('disconnected');
         bleStatusEl.classList.add('connected');
-        connectBleBtn.innerText = 'Glove Active ⚡';
-        if (footerGloveStatus) footerGloveStatus.textContent = 'Active';
+        connectBleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"></polyline></svg><span>Glove Connected</span>';
+        if (footerGloveStatus) footerGloveStatus.textContent = 'Connected';
         if (footerGloveDot) { footerGloveDot.style.background = 'var(--accent-color)'; footerGloveDot.style.boxShadow = '0 0 6px var(--accent-glow)'; }
         console.log('BLE Connection Established and Listening!');
     } catch (error) {
@@ -162,10 +162,10 @@ function onDisconnected() {
     bleStatusEl.innerText = 'Disconnected';
     bleStatusEl.classList.remove('connected');
     bleStatusEl.classList.add('disconnected');
-    connectBleBtn.innerText = 'Connect Glove 📡';
+    connectBleBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"></polyline></svg><span>Connect Glove BLE</span>';
     gloveRollEl.innerText = '0.0°';
     glovePitchEl.innerText = '0.0°';
-    if (footerGloveStatus) footerGloveStatus.textContent = 'Off';
+    if (footerGloveStatus) footerGloveStatus.textContent = 'Disconnected';
     if (footerGloveDot) { footerGloveDot.style.background = 'var(--danger-color)'; footerGloveDot.style.boxShadow = '0 0 6px var(--danger-glow)'; }
 }
 
@@ -293,11 +293,12 @@ async function buildAndTrainModel() {
             epochs: 20,
             batchSize: 256,
             shuffle: true,
-            yieldEvery: 'epoch',
+            yieldEvery: 'batch',
             callbacks: {
-                onEpochEnd: (epoch, logs) => {
+                onEpochEnd: async (epoch, logs) => {
                     const progress = Math.round(((epoch + 1) / 20) * 100);
-                    statusText.innerText = `Training Powerful NN... ${progress}%`;
+                    statusText.innerText = `Training Neural Network... ${progress}%`;
+                    await tf.nextFrame();
                 }
             }
         });

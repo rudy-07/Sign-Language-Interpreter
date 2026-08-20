@@ -148,7 +148,7 @@ async function handleSendMessage() {
         if (err.message && err.message.includes("signed in")) {
             errorHint = "Puter requires sign-in for free AI. A sign-in popup should appear — please allow it.";
         }
-        appendMessage('ai', `⚠️ ${errorHint}\n\nDetails: ${err}`);
+        appendMessage('ai', `${errorHint}\n\nDetails: ${err}`);
     }
 }
 

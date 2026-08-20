@@ -4,21 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASL Alphabet Detector — Real-time Sign Language Translation</title>
+    <title>ASL Alphabet Interpreter — Real-time Computer Vision</title>
     <meta name="description"
-        content="Real-time American Sign Language alphabet detection using AI and computer vision. Translate signs to text and speech in multiple languages.">
+        content="Real-time American Sign Language detection and multi-language translation powered by MediaPipe, TensorFlow.js, and IoT Smart Glove integration.">
 
-    <!-- Modern Typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="style.css">
 
     <!-- MediaPipe Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
-        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
     <!-- TensorFlow.js Library -->
@@ -32,54 +33,79 @@
         <header class="glass-panel">
             <div class="header-inner">
                 <div class="header-left">
-                    <span class="header-icon">🤟</span>
+                    <div class="brand-badge">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"></path>
+                            <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"></path>
+                            <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"></path>
+                            <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"></path>
+                        </svg>
+                    </div>
                     <div class="header-titles">
-                        <h1>ASL <span class="highlight">Alphabet</span></h1>
-                        <p>Real-time Sign Language Translation</p>
+                        <h1>ASL <span class="highlight">Interpreter</span> <span class="version-pill">v2.4 PRO</span></h1>
+                        <p>Real-Time Neural Vision & Multi-Modal Sign Translation</p>
                     </div>
                 </div>
-                <nav class="nav-menu">
-                    <a href="index.html" class="nav-link active">📷 Alphabet Detector</a>
-                    <a href="chat.html" class="nav-link">🤖 AI Chatbot</a>
+                <nav class="nav-menu" aria-label="Primary Navigation">
+                    <a href="index.html" class="nav-link active" aria-current="page">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                        <span>Alphabet Detector</span>
+                    </a>
+                    <a href="chat.html" class="nav-link">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>AI Assistant</span>
+                    </a>
                 </nav>
             </div>
         </header>
 
-        <!-- ==================== MAIN GRID ==================== -->
+        <!-- ==================== MAIN WORKSPACE ==================== -->
         <main class="vision-container">
 
-            <!-- ===== LEFT COLUMN (65%) — Camera + Detected Sign ===== -->
+            <!-- ===== LEFT COLUMN (Primary Workspace) ===== -->
             <div class="left-column">
 
-                <!-- Camera Feed -->
+                <!-- Camera Feed Viewport -->
                 <div class="camera-wrapper glass-panel" id="camera-container">
                     <video id="webcam" autoplay playsinline muted></video>
                     <canvas class="output_canvas" id="output_canvas"></canvas>
 
-                    <!-- Camera Status Badges -->
+                    <!-- Camera Telemetry Overlay -->
                     <div class="camera-status-bar">
-                        <div class="camera-badge"><span class="dot"></span> LIVE</div>
+                        <div class="camera-badge"><span class="dot"></span> LIVE FEED</div>
                         <div class="camera-badge" id="fps-badge">FPS: --</div>
                     </div>
 
-                    <!-- Loading Overlay -->
+                    <!-- Loading / Initialization Overlay -->
                     <div class="status-overlay" id="status-overlay">
                         <div class="loader"></div>
-                        <p id="status-text">Initializing Camera & AI...</p>
+                        <p id="status-text">Initializing Vision Engine & Neural Network...</p>
                     </div>
                 </div>
 
-                <!-- Detected Sign (below camera) -->
+                <!-- Detected Sign & Confidence HUD -->
                 <div class="result-panel glass-panel">
                     <div class="letter-display" id="letter-display-el">
                         <span id="detected-letter">-</span>
                     </div>
                     <div class="detection-info">
-                        <h2 class="section-title">
-                            <span class="section-icon">✋</span> Detected Sign
-                        </h2>
+                        <div class="detection-header">
+                            <h2 class="section-title">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <circle cx="12" cy="12" r="6"></circle>
+                                    <circle cx="12" cy="12" r="2"></circle>
+                                </svg>
+                                <span>Detected Sign</span>
+                            </h2>
+                        </div>
                         <div class="confidence-bar-wrapper">
-                            <div class="confidence-bar">
+                            <div class="confidence-bar" aria-label="Confidence level">
                                 <div class="confidence-fill" id="confidence-fill"></div>
                             </div>
                             <span class="confidence-text" id="confidence-text">0%</span>
@@ -89,169 +115,251 @@
 
             </div>
 
-            <!-- ===== RIGHT COLUMN (35%) — Glove / Sentence / Training ===== -->
+            <!-- ===== RIGHT COLUMN (Telemetry, Controls & Translation) ===== -->
             <div class="side-panel">
 
-                <!-- Smart Glove Status -->
+                <!-- Smart Glove IoT Telemetry Panel -->
                 <div class="hardware-panel glass-panel">
-                    <h2 class="section-title"><span class="section-icon">🧤</span> Smart Glove Status</h2>
-                    <div class="hardware-controls">
-                        <button id="connect-ble-btn" class="btn primary">Connect Glove 📡</button>
+                    <div class="panel-header-row">
+                        <h2 class="section-title">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+                            </svg>
+                            <span>Smart Glove Telemetry</span>
+                        </h2>
                         <span id="ble-status" class="status-badge disconnected">Disconnected</span>
+                    </div>
+                    <div class="hardware-controls">
+                        <button id="connect-ble-btn" class="btn primary" style="width: 100%;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"></polyline>
+                            </svg>
+                            <span>Connect Glove BLE</span>
+                        </button>
                     </div>
                     <div class="data-grid">
                         <div class="data-box">
-                            <span class="data-icon">🔄</span>
-                            <span class="data-label">Roll</span>
+                            <div class="data-header">
+                                <span class="data-label">Roll</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                                </svg>
+                            </div>
                             <span class="data-value" id="glove-roll">0.0°</span>
                         </div>
                         <div class="data-box">
-                            <span class="data-icon">📐</span>
-                            <span class="data-label">Pitch</span>
+                            <div class="data-header">
+                                <span class="data-label">Pitch</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                                </svg>
+                            </div>
                             <span class="data-value" id="glove-pitch">0.0°</span>
                         </div>
                     </div>
                     <div class="debug-divider">
                         <div class="data-grid">
                             <div class="data-box small">
-                                <span class="data-label">Pitch Δ</span>
-                                <span class="data-value" id="debug-pitch-delta">0.0</span>
+                                <span class="data-label">Pitch &Delta;</span>
+                                <span class="data-value" id="debug-pitch-delta">0.0°</span>
                             </div>
                             <div class="data-box small">
-                                <span class="data-label">Roll Δ</span>
-                                <span class="data-value" id="debug-roll-delta">0.0</span>
+                                <span class="data-label">Roll &Delta;</span>
+                                <span class="data-value" id="debug-roll-delta">0.0°</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sentence Builder -->
+                <!-- Sentence Stream Builder -->
                 <div class="sentence-panel glass-panel">
-                    <h2 class="section-title"><span class="section-icon">💬</span> Sentence Builder</h2>
+                    <h2 class="section-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        <span>Sentence Builder</span>
+                    </h2>
 
-                    <div id="sentence-display">
-                        <!-- Word tags appear here -->
+                    <div id="sentence-display" aria-label="Detected Word Tokens" role="region">
+                        <!-- Dynamic word tags rendered by script.js -->
                     </div>
 
-                    <p class="sentence-instructions">
-                        Letters are typed <strong>Instantly!</strong> (Continuous Stream)<br>
-                        <em>To type a double letter (e.g. LL), briefly drop your hand.</em><br>
-                        Keyboard: <kbd>Space</kbd> for Space, <kbd>Backspace</kbd> to Delete.
-                    </p>
+                    <div class="sentence-instructions">
+                        <span>Continuous Token Stream &bull; Drop hand briefly for double characters.<br>
+                        Shortcuts: <kbd>Space</kbd> Space &bull; <kbd>Backspace</kbd> Delete &bull; <kbd>Enter</kbd> Commit</span>
+                    </div>
 
                     <div class="sentence-controls">
-                        <button id="clear-sentence-btn" class="btn danger" style="flex: 1;">🗑️ Clear</button>
-                        <button id="speak-sentence-btn" class="btn success" style="flex: 2;">🔊 Speak</button>
+                        <button id="clear-sentence-btn" class="btn danger" style="flex: 1;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            <span>Clear</span>
+                        </button>
+                        <button id="speak-sentence-btn" class="btn success" style="flex: 2;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                            <span>Speak Text</span>
+                        </button>
                     </div>
 
-                    <!-- Translation -->
-                    <div style="border-top: 1px solid var(--panel-border); padding-top: 12px; margin-top: 4px;">
-                        <h3 class="section-title" style="font-size: 0.78rem;"><span class="section-icon">🌐</span>
-                            Translate & Speak</h3>
+                    <!-- Multi-Language Translation -->
+                    <div class="translation-section">
+                        <h3 class="section-title" style="font-size: 0.72rem;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                            <span>Translate & Voice Output</span>
+                        </h3>
                         <div class="translation-controls">
-                            <select id="translate-lang">
-                                <option value="ta">🇮🇳 Tamil</option>
-                                <option value="hi">🇮🇳 Hindi</option>
-                                <option value="es">🇪🇸 Spanish</option>
-                                <option value="fr">🇫🇷 French</option>
-                                <option value="de">🇩🇪 German</option>
-                                <option value="ja">🇯🇵 Japanese</option>
-                                <option value="ko">🇰🇷 Korean</option>
-                                <option value="zh-CN">🇨🇳 Chinese</option>
-                                <option value="ar">🇸🇦 Arabic</option>
-                                <option value="pt">🇧🇷 Portuguese</option>
-                                <option value="ru">🇷🇺 Russian</option>
-                                <option value="te">🇮🇳 Telugu</option>
-                                <option value="ml">🇮🇳 Malayalam</option>
-                                <option value="kn">🇮🇳 Kannada</option>
+                            <select id="translate-lang" aria-label="Select Target Translation Language">
+                                <option value="ta">Tamil (ta)</option>
+                                <option value="hi">Hindi (hi)</option>
+                                <option value="es">Spanish (es)</option>
+                                <option value="fr">French (fr)</option>
+                                <option value="de">German (de)</option>
+                                <option value="ja">Japanese (ja)</option>
+                                <option value="ko">Korean (ko)</option>
+                                <option value="zh-CN">Chinese (zh-CN)</option>
+                                <option value="ar">Arabic (ar)</option>
+                                <option value="pt">Portuguese (pt)</option>
+                                <option value="ru">Russian (ru)</option>
+                                <option value="te">Telugu (te)</option>
+                                <option value="ml">Malayalam (ml)</option>
+                                <option value="kn">Kannada (kn)</option>
                             </select>
-                            <button id="translate-btn" class="btn translate-btn">Translate</button>
-                            <button id="speak-translated-btn" class="btn success"
-                                style="padding: 10px 14px;">🔊</button>
+                            <button id="translate-btn" class="btn translate-btn">
+                                <span>Translate</span>
+                            </button>
+                            <button id="speak-translated-btn" class="btn success" aria-label="Speak Translated Output" style="padding: 8px 12px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                </svg>
+                            </button>
                         </div>
-                        <div id="translated-output" style="margin-top: 8px; display: none;"></div>
+                        <div id="translated-output" style="display: none;"></div>
                     </div>
                 </div>
 
-                <!-- Manual Training -->
+                <!-- Manual Calibration & KNN Overrides -->
                 <div class="training-panel glass-panel">
-                    <h2 class="section-title"><span class="section-icon">🧠</span> Manual Training</h2>
-                    <p class="desc">Is a letter not detecting well? Teach the AI your hand shape to override the default
-                        model.</p>
+                    <h2 class="section-title">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                            <rect x="9" y="9" width="6" height="6"></rect>
+                            <line x1="9" y1="1" x2="9" y2="4"></line>
+                            <line x1="15" y1="1" x2="15" y2="4"></line>
+                            <line x1="9" y1="20" x2="9" y2="23"></line>
+                            <line x1="15" y1="20" x2="15" y2="23"></line>
+                            <line x1="20" y1="9" x2="23" y2="9"></line>
+                            <line x1="20" y1="14" x2="23" y2="14"></line>
+                            <line x1="1" y1="9" x2="4" y2="9"></line>
+                            <line x1="1" y1="14" x2="4" y2="14"></line>
+                        </svg>
+                        <span>Manual Overrides & Training</span>
+                    </h2>
+                    <p class="desc">Calibrate difficult gestures to teach your specific hand geometry to the KNN engine.</p>
 
                     <div class="train-controls">
-                        <select id="train-class">
-                            <option value="A">Letter A</option>
-                            <option value="B">Letter B</option>
-                            <option value="C">Letter C</option>
-                            <option value="D">Letter D</option>
-                            <option value="E">Letter E</option>
-                            <option value="F">Letter F</option>
-                            <option value="G">Letter G</option>
-                            <option value="H">Letter H</option>
-                            <option value="I">Letter I</option>
-                            <option value="J">Letter J</option>
-                            <option value="K">Letter K</option>
-                            <option value="L">Letter L</option>
-                            <option value="M">Letter M</option>
-                            <option value="N">Letter N</option>
-                            <option value="O">Letter O</option>
-                            <option value="P">Letter P</option>
-                            <option value="Q">Letter Q</option>
-                            <option value="R">Letter R</option>
-                            <option value="S">Letter S</option>
-                            <option value="T">Letter T</option>
-                            <option value="U">Letter U</option>
-                            <option value="V">Letter V</option>
-                            <option value="W">Letter W</option>
-                            <option value="X">Letter X</option>
-                            <option value="Y">Letter Y</option>
-                            <option value="Z">Letter Z</option>
+                        <select id="train-class" aria-label="Select Target Class for Training">
+                            <option value="A">Class A</option>
+                            <option value="B">Class B</option>
+                            <option value="C">Class C</option>
+                            <option value="D">Class D</option>
+                            <option value="E">Class E</option>
+                            <option value="F">Class F</option>
+                            <option value="G">Class G</option>
+                            <option value="H">Class H</option>
+                            <option value="I">Class I</option>
+                            <option value="J">Class J</option>
+                            <option value="K">Class K</option>
+                            <option value="L">Class L</option>
+                            <option value="M">Class M</option>
+                            <option value="N">Class N</option>
+                            <option value="O">Class O</option>
+                            <option value="P">Class P</option>
+                            <option value="Q">Class Q</option>
+                            <option value="R">Class R</option>
+                            <option value="S">Class S</option>
+                            <option value="T">Class T</option>
+                            <option value="U">Class U</option>
+                            <option value="V">Class V</option>
+                            <option value="W">Class W</option>
+                            <option value="X">Class X</option>
+                            <option value="Y">Class Y</option>
+                            <option value="Z">Class Z</option>
                         </select>
-                        <button id="add-example-btn" class="btn primary">📸 Capture Frame</button>
+                        <button id="add-example-btn" class="btn primary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                <circle cx="12" cy="13" r="4"></circle>
+                            </svg>
+                            <span>Capture Gesture Frame</span>
+                        </button>
                     </div>
 
                     <div class="stats">
-                        <p>Overrides: <strong><span id="example-count">0</span></strong> frames</p>
-                        <button id="clear-data-btn" class="btn danger">Clear Data</button>
+                        <span>Active Overrides: <strong><span id="example-count">0</span></strong> frames</span>
+                        <button id="clear-data-btn" class="btn danger" style="padding: 4px 8px; font-size: 0.72rem;">Clear</button>
                     </div>
 
                     <div class="storage-controls">
-                        <button id="save-model-btn" class="btn secondary" style="flex:1;">💾 Save</button>
-                        <button id="load-model-btn" class="btn secondary" style="flex:1;">📂 Load</button>
+                        <button id="save-model-btn" class="btn secondary" style="flex:1;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            <span>Save</span>
+                        </button>
+                        <button id="load-model-btn" class="btn secondary" style="flex:1;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span>Load</span>
+                        </button>
                     </div>
                 </div>
 
             </div>
         </main>
 
-        <!-- ==================== FOOTER STATUS BAR ==================== -->
-        <footer class="footer-status glass-panel">
+        <!-- ==================== FOOTER STATUS DOCK ==================== -->
+        <footer class="footer-status glass-panel" role="contentinfo">
             <div class="footer-item">
                 <span class="dot-indicator" id="footer-camera-dot"></span>
-                Camera: <strong id="footer-camera-status">Starting</strong>
+                <span>Camera: <strong id="footer-camera-status">Initializing</strong></span>
             </div>
             <span class="footer-separator"></span>
             <div class="footer-item">
                 <span class="dot-indicator" id="footer-model-dot"></span>
-                Model: <strong id="footer-model-status">Loading</strong>
+                <span>Neural Model: <strong id="footer-model-status">Loading</strong></span>
             </div>
             <span class="footer-separator"></span>
             <div class="footer-item">
-                FPS: <strong id="footer-fps">--</strong>
+                <span>FPS: <strong id="footer-fps">--</strong></span>
             </div>
             <span class="footer-separator"></span>
             <div class="footer-item">
-                <span class="dot-indicator disconnected" id="footer-glove-dot"
-                    style="background: var(--danger-color); box-shadow: 0 0 6px var(--danger-glow);"></span>
-                Glove: <strong id="footer-glove-status">Off</strong>
+                <span class="dot-indicator disconnected" id="footer-glove-dot"></span>
+                <span>Glove BLE: <strong id="footer-glove-status">Disconnected</strong></span>
             </div>
         </footer>
 
     </div>
 
+    <!-- Machine Learning Runtime -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
-    <script src="script.js?v=9"></script>
+    <script src="script.js?v=10"></script>
 </body>
 
 </html>
