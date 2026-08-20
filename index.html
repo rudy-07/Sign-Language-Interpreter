@@ -42,8 +42,8 @@
                         </svg>
                     </div>
                     <div class="header-titles">
-                        <h1>ASL <span class="highlight">Interpreter</span> <span class="version-pill">v2.4 PRO</span></h1>
-                        <p>Real-Time Neural Vision & Multi-Modal Sign Translation</p>
+                        <h1>ASL <span class="highlight">Interpreter</span> <span class="version-pill">v2.4</span></h1>
+                        <p>Alphabet detection and sentence output</p>
                     </div>
                 </div>
                 <nav class="nav-menu" aria-label="Primary Navigation">
@@ -58,7 +58,7 @@
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
-                        <span>AI Assistant</span>
+                        <span>Gesture assistant</span>
                     </a>
                 </nav>
             </div>
@@ -77,14 +77,14 @@
 
                     <!-- Camera Telemetry Overlay -->
                     <div class="camera-status-bar">
-                        <div class="camera-badge"><span class="dot"></span> LIVE FEED</div>
+                        <div class="camera-badge"><span class="dot"></span> Camera input</div>
                         <div class="camera-badge" id="fps-badge">FPS: --</div>
                     </div>
 
                     <!-- Loading / Initialization Overlay -->
                     <div class="status-overlay" id="status-overlay">
                         <div class="loader"></div>
-                        <p id="status-text">Initializing Vision Engine & Neural Network...</p>
+                        <p id="status-text">Preparing camera and recognition model…</p>
                     </div>
                 </div>
 
@@ -128,12 +128,12 @@
                                 <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
                                 <line x1="12" y1="20" x2="12.01" y2="20"></line>
                             </svg>
-                            <span>Smart Glove Telemetry</span>
+                            <span>Smart glove</span>
                         </h2>
                         <span id="ble-status" class="status-badge disconnected">Disconnected</span>
                     </div>
                     <div class="hardware-controls">
-                        <button id="connect-ble-btn" class="btn primary" style="width: 100%;">
+                        <button id="connect-ble-btn" class="btn primary">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"></polyline>
                             </svg>
@@ -180,7 +180,7 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
-                        <span>Sentence Builder</span>
+                        <span>Interpreted sentence</span>
                     </h2>
 
                     <div id="sentence-display" aria-label="Detected Word Tokens" role="region">
@@ -193,14 +193,14 @@
                     </div>
 
                     <div class="sentence-controls">
-                        <button id="clear-sentence-btn" class="btn danger" style="flex: 1;">
+                        <button id="clear-sentence-btn" class="btn danger">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="3 6 5 6 21 6"></polyline>
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                             </svg>
                             <span>Clear</span>
                         </button>
-                        <button id="speak-sentence-btn" class="btn success" style="flex: 2;">
+                        <button id="speak-sentence-btn" class="btn success">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                                 <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -211,13 +211,13 @@
 
                     <!-- Multi-Language Translation -->
                     <div class="translation-section">
-                        <h3 class="section-title" style="font-size: 0.72rem;">
+                        <h3 class="section-title">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="2" y1="12" x2="22" y2="12"></line>
                                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                             </svg>
-                            <span>Translate & Voice Output</span>
+                            <span>Translation and voice</span>
                         </h3>
                         <div class="translation-controls">
                             <select id="translate-lang" aria-label="Select Target Translation Language">
@@ -239,7 +239,7 @@
                             <button id="translate-btn" class="btn translate-btn">
                                 <span>Translate</span>
                             </button>
-                            <button id="speak-translated-btn" class="btn success" aria-label="Speak Translated Output" style="padding: 8px 12px;">
+                            <button id="speak-translated-btn" class="btn success" aria-label="Speak Translated Output">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
@@ -265,9 +265,9 @@
                             <line x1="1" y1="9" x2="4" y2="9"></line>
                             <line x1="1" y1="14" x2="4" y2="14"></line>
                         </svg>
-                        <span>Manual Overrides & Training</span>
+                        <span>Calibration</span>
                     </h2>
-                    <p class="desc">Calibrate difficult gestures to teach your specific hand geometry to the KNN engine.</p>
+                    <p class="desc">Add examples when a gesture is consistently misread. Changes stay on this device.</p>
 
                     <div class="train-controls">
                         <select id="train-class" aria-label="Select Target Class for Training">
@@ -309,11 +309,11 @@
 
                     <div class="stats">
                         <span>Active Overrides: <strong><span id="example-count">0</span></strong> frames</span>
-                        <button id="clear-data-btn" class="btn danger" style="padding: 4px 8px; font-size: 0.72rem;">Clear</button>
+                        <button id="clear-data-btn" class="btn danger">Clear</button>
                     </div>
 
                     <div class="storage-controls">
-                        <button id="save-model-btn" class="btn secondary" style="flex:1;">
+                        <button id="save-model-btn" class="btn secondary">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                                 <polyline points="17 21 17 13 7 13 7 21"></polyline>
@@ -321,7 +321,7 @@
                             </svg>
                             <span>Save</span>
                         </button>
-                        <button id="load-model-btn" class="btn secondary" style="flex:1;">
+                        <button id="load-model-btn" class="btn secondary">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                             </svg>
@@ -333,7 +333,7 @@
             </div>
         </main>
 
-        <!-- ==================== FOOTER STATUS DOCK ==================== -->
+        <!-- System status -->
         <footer class="footer-status glass-panel" role="contentinfo">
             <div class="footer-item">
                 <span class="dot-indicator" id="footer-camera-dot"></span>
