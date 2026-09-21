@@ -4,7 +4,7 @@ title: "Sign Language Interpreter: Real-Time Multimodal ASL Recognition and Sens
 abstract: "An open-source assistive human-computer interaction system combining computer vision landmark tracking, on-device deep learning neural networks, and ESP32 IMU smart glove sensor fusion for real-time sign language recognition and translation."
 version: 1.0.0
 date-released: 2026-08-20
-license: MIT
+license: Apache-2.0
 repository-code: "https://github.com/rudy-07/Sign-Language-Interpreter"
 authors:
   - family-names: "Shekhar"

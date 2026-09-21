@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/ML-TensorFlow.js-F39C12.svg" alt="TensorFlow.js" />
   <img src="https://img.shields.io/badge/Hardware-ESP32%20%2B%20MPU6050-red.svg" alt="ESP32" />
   <img src="https://img.shields.io/badge/Wireless-Web%20Bluetooth%20BLE-007acc.svg" alt="BLE" />
-  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License" />
+  <img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License" />
 </p>
 
 <p align="center">
@@ -187,7 +187,7 @@ sequenceDiagram
 ```text
 Sign-Language-Interpreter/
 ├── README.md                      # Project landing page & documentation map
-├── LICENSE                        # MIT License
+├── LICENSE                        # Apache 2.0 License
 ├── CONTRIBUTING.md                # Contribution guidelines & PR standards
 ├── CODE_OF_CONDUCT.md             # Contributor Covenant Code of Conduct v2.1
 ├── CHANGELOG.md                   # Semantic version history
@@ -391,4 +391,4 @@ Navigate directly to individual technical documentation sections:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
