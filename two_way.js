@@ -191,7 +191,7 @@
 
         _bindConnection(conn) {
             this.connection = conn;
-            conn.on('open', () => {
+            const onOpen = () => {
                 this.isConnected = true;
                 this._notifyState('connected', `Connected with ${this.partnerName} (${this.partnerRole})`);
                 this.send({
@@ -199,7 +199,13 @@
                     ts: Date.now(),
                     payload: { action: 'handshake', role: this.role, peerId: this.peerId }
                 });
-            });
+            };
+
+            if (conn.open) {
+                onOpen();
+            } else {
+                conn.on('open', onOpen);
+            }
 
             conn.on('data', (data) => {
                 this._handleIncomingPacket(data, 'webrtc');
@@ -208,6 +214,10 @@
             conn.on('close', () => {
                 this.isConnected = false;
                 this._notifyState('disconnected', 'WebRTC connection closed.');
+            });
+
+            conn.on('error', (err) => {
+                console.warn('[TwoWay P2P] Connection error:', err);
             });
         }
 
@@ -679,6 +689,44 @@
     // Two-Way UI Orchestration & Shared Pipeline Integration
     // -------------------------------------------------------------------------
 
+    // Helper to safely resolve elements across various ID naming conventions
+    const getEl = (...ids) => {
+        for (const id of ids) {
+            const el = document.getElementById(id);
+            if (el) return el;
+        }
+        return null;
+    };
+
+    function copyTextSafe(text) {
+        if (!text) return Promise.reject(new Error('No text to copy'));
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+        }
+        return fallbackCopy(text);
+    }
+
+    function fallbackCopy(text) {
+        return new Promise((resolve, reject) => {
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.top = '-9999px';
+                ta.style.left = '-9999px';
+                ta.setAttribute('readonly', '');
+                document.body.appendChild(ta);
+                ta.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                if (ok) resolve();
+                else reject(new Error('execCommand copy failed'));
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
     let twoWayManager = null;
     let lexiconService = null;
     let handsPipeline = null;
@@ -700,76 +748,117 @@
         }
 
         // DOM elements
-        const modal = document.getElementById('two-way-modal');
-        const openBtn = document.getElementById('open-two-way-btn');
-        const closeBtn = document.getElementById('two-way-close-btn');
+        const modal = getEl('two-way-modal');
+        const openBtn = getEl('open-two-way-btn');
+        const closeBtn = getEl('close-two-way-btn', 'two-way-close-btn');
 
-        const rolePills = document.getElementById('two-way-role-pills');
-        const signerSection = document.getElementById('two-way-signer-section');
-        const speakerSection = document.getElementById('two-way-speaker-section');
+        const setupView = getEl('two-way-setup-view');
+        const activeView = getEl('two-way-active-view');
 
-        const createRoomBtn = document.getElementById('two-way-create-room-btn');
-        const hostIdle = document.getElementById('two-way-host-idle');
-        const hostActive = document.getElementById('two-way-host-active');
-        const hostCodeDisplay = document.getElementById('two-way-host-code-display');
-        const copyCodeBtn = document.getElementById('two-way-copy-code-btn');
-        const copyCodeText = document.getElementById('two-way-copy-code-text');
-        const copyLinkBtn = document.getElementById('two-way-copy-link-btn');
-        const copyLinkText = document.getElementById('two-way-copy-link-text');
+        const rolePills = getEl('two-way-role-pills');
+        const signerSection = getEl('two-way-signer-section');
+        const speakerSection = getEl('two-way-speaker-section');
 
-        const joinInput = document.getElementById('two-way-join-code-input');
-        const joinBtn = document.getElementById('two-way-join-btn');
-        const joinFeedback = document.getElementById('two-way-join-feedback');
+        const createRoomBtn = getEl('two-way-create-room-btn');
+        const hostIdle = getEl('two-way-host-idle');
+        const hostActive = getEl('two-way-host-active');
+        const hostCodeDisplay = getEl('host-room-code-display', 'two-way-host-code-display');
+        const copyCodeBtn = getEl('copy-room-code-btn', 'two-way-copy-code-btn');
+        const copyCodeText = getEl('copy-code-text', 'two-way-copy-code-text');
+        const copyLinkBtn = getEl('copy-room-link-btn', 'two-way-copy-link-btn');
+        const copyLinkText = getEl('copy-link-text', 'two-way-copy-link-text');
+        const hostWaitText = getEl('host-wait-text');
 
-        const connBanner = document.getElementById('two-way-conn-banner');
-        const connStatusText = document.getElementById('two-way-conn-status-text');
-        const leaveRoomBtn = document.getElementById('two-way-leave-room-btn');
+        const joinInput = getEl('two-way-join-input', 'two-way-join-code-input');
+        const joinBtn = getEl('two-way-join-btn');
+        const joinFeedback = getEl('two-way-join-feedback');
 
-        const skeletonCanvas = document.getElementById('two-way-skeleton-canvas');
+        const sessionCodeDisplay = getEl('two-way-session-code');
+        const partnerBadge = getEl('two-way-partner-badge');
+        const roleIndicator = getEl('two-way-role-indicator');
+        const leaveRoomBtn = getEl('two-way-disconnect-btn', 'two-way-leave-room-btn');
+
+        const skeletonCanvas = getEl('two-way-skeleton-canvas');
         const skeletonCtx = skeletonCanvas ? skeletonCanvas.getContext('2d') : null;
-        const activeTitle = document.getElementById('two-way-active-title');
-        const activeDesc = document.getElementById('two-way-active-desc');
-        const activeGlyph = document.getElementById('two-way-active-glyph');
+        const activeTitle = getEl('two-way-active-title');
+        const activeDesc = getEl('two-way-active-desc');
+        const activeGlyph = getEl('two-way-active-glyph');
+        const pauseSignBtn = getEl('two-way-pause-sign-btn');
 
-        const handIndicator = document.getElementById('two-way-hand-indicator');
-        const handDot = document.getElementById('two-way-hand-dot');
-        const handText = document.getElementById('two-way-hand-text');
-        const framingTip = document.getElementById('two-way-framing-tip');
+        const handIndicator = getEl('two-way-hand-indicator');
+        const handDot = getEl('two-way-hand-dot');
+        const handText = getEl('two-way-hand-text');
+        const framingTip = getEl('two-way-framing-tip');
 
-        const toggleLocalHands = document.getElementById('two-way-toggle-local-hands');
-        const toggleWordMode = document.getElementById('two-way-toggle-word-mode');
-        const toggleTextOnly = document.getElementById('two-way-toggle-text-only');
-        const wordCandidatesBox = document.getElementById('two-way-word-candidates');
-        const candidateButtons = document.getElementById('two-way-candidate-buttons');
-        const streamTokensBox = document.getElementById('two-way-stream-tokens');
+        const toggleLocalHands = getEl('two-way-toggle-local-hands');
+        const toggleWordMode = getEl('two-way-toggle-word-mode');
+        const toggleTextOnly = getEl('two-way-toggle-text-only');
+        const wordCandidatesBox = getEl('two-way-word-candidates');
+        const candidateButtons = getEl('two-way-candidate-buttons');
+        const streamTokensBox = getEl('two-way-stream-tokens');
+        const sendCurrentSignBtn = getEl('two-way-send-current-sign-btn');
 
-        const transcriptBox = document.getElementById('two-way-chat-transcript');
-        const msgCountEl = document.getElementById('two-way-msg-count');
-        const emptyStateEl = document.getElementById('transcript-empty-state');
-        const copyTranscriptBtn = document.getElementById('two-way-copy-transcript-btn');
-        const dlTranscriptBtn = document.getElementById('two-way-download-transcript-btn');
+        const transcriptBox = getEl('two-way-chat-transcript');
+        const msgCountEl = getEl('two-way-msg-count');
+        const emptyStateEl = getEl('transcript-empty-state');
+        const copyTranscriptBtn = getEl('two-way-copy-transcript-btn');
+        const copyTranscriptText = getEl('two-way-copy-transcript-text');
+        const dlTranscriptBtn = getEl('two-way-download-transcript-btn');
 
-        const textInput = document.getElementById('two-way-text-input');
-        const sendTextBtn = document.getElementById('two-way-send-text-btn');
-        const micBtn = document.getElementById('two-way-speak-mic-btn');
-        const autoSpeakToggle = document.getElementById('two-way-auto-speak-toggle');
+        const textInput = getEl('two-way-text-input');
+        const sendTextBtn = getEl('two-way-send-text-btn');
+        const micBtn = getEl('two-way-speak-mic-btn');
+        const autoSpeakToggle = getEl('two-way-auto-speak-toggle');
 
         let currentRole = 'signing';
         let lastHandTrackedTime = Date.now();
 
-        // Open/Close Modal
-        if (openBtn && modal) {
-            openBtn.addEventListener('click', () => {
-                modal.classList.add('open');
+        // View management: toggle between Setup (Host/Join) and Active (Connected)
+        function updateRoomView(isConnected) {
+            if (isConnected) {
+                if (setupView) setupView.style.display = 'none';
+                if (activeView) activeView.style.display = 'block';
+                if (sessionCodeDisplay) sessionCodeDisplay.textContent = twoWayManager.roomCode || 'ASL-ROOM';
+                if (partnerBadge) partnerBadge.textContent = `Partner: ${twoWayManager.partnerName || 'Connected'}`;
+                if (roleIndicator) roleIndicator.textContent = `Role: ${currentRole.charAt(0).toUpperCase() + currentRole.slice(1)}`;
                 applyRoleVisibility(currentRole);
-            });
+            } else {
+                if (activeView) activeView.style.display = 'none';
+                if (setupView) setupView.style.display = 'block';
+                if (hostIdle && hostActive) {
+                    hostIdle.style.display = 'block';
+                    hostActive.style.display = 'none';
+                }
+            }
         }
 
-        if (closeBtn && modal) {
-            closeBtn.addEventListener('click', () => {
+        // Open/Close Modal
+        function openModal() {
+            if (modal) {
+                modal.classList.add('open');
+                updateRoomView(twoWayManager.isConnected);
+                applyRoleVisibility(currentRole);
+            }
+        }
+
+        function closeModal() {
+            if (modal) {
                 modal.classList.remove('open');
+            }
+        }
+
+        if (openBtn) openBtn.addEventListener('click', openModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
             });
         }
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal && modal.classList.contains('open')) {
+                closeModal();
+            }
+        });
 
         // Role Selection
         function applyRoleVisibility(role) {
@@ -807,41 +896,65 @@
                     hostActive.style.display = 'block';
                 }
                 if (hostCodeDisplay) hostCodeDisplay.textContent = twoWayManager.roomCode;
+                if (hostWaitText) hostWaitText.textContent = 'Waiting for partner to join...';
             });
         }
 
         // Copy Code / Link
         if (copyCodeBtn) {
             copyCodeBtn.addEventListener('click', () => {
-                if (twoWayManager.roomCode && navigator.clipboard) {
-                    navigator.clipboard.writeText(twoWayManager.roomCode).then(() => {
-                        if (copyCodeText) copyCodeText.textContent = 'Copied!';
-                        setTimeout(() => { if (copyCodeText) copyCodeText.textContent = 'Copy Code'; }, 1800);
-                    });
-                }
+                const code = twoWayManager.roomCode;
+                if (!code) return;
+                copyTextSafe(code).then(() => {
+                    if (copyCodeText) {
+                        const orig = copyCodeText.textContent;
+                        copyCodeText.textContent = 'Copied!';
+                        setTimeout(() => { copyCodeText.textContent = orig; }, 1800);
+                    }
+                }).catch(() => {
+                    showJoinFeedback('error', 'Failed to copy code to clipboard.');
+                });
             });
         }
 
         if (copyLinkBtn) {
             copyLinkBtn.addEventListener('click', () => {
-                if (twoWayManager.roomCode && navigator.clipboard) {
-                    const link = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(twoWayManager.roomCode)}`;
-                    navigator.clipboard.writeText(link).then(() => {
-                        if (copyLinkText) copyLinkText.textContent = 'Link Copied!';
-                        setTimeout(() => { if (copyLinkText) copyLinkText.textContent = 'Copy Link'; }, 1800);
-                    });
-                }
+                const code = twoWayManager.roomCode;
+                if (!code) return;
+                const link = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(code)}`;
+                copyTextSafe(link).then(() => {
+                    if (copyLinkText) {
+                        const orig = copyLinkText.textContent;
+                        copyLinkText.textContent = 'Link Copied!';
+                        setTimeout(() => { copyLinkText.textContent = orig; }, 1800);
+                    }
+                }).catch(() => {
+                    showJoinFeedback('error', 'Failed to copy link to clipboard.');
+                });
             });
         }
 
         // Join Room
+        if (joinInput) {
+            joinInput.addEventListener('input', () => {
+                joinInput.value = joinInput.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+            });
+            joinInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (joinBtn) joinBtn.click();
+                }
+            });
+        }
+
         if (joinBtn && joinInput) {
             joinBtn.addEventListener('click', () => {
                 const code = joinInput.value.trim();
                 if (!code) {
-                    showJoinFeedback('error', 'Please enter a 3-character room code.');
+                    showJoinFeedback('error', 'Please enter a room code (e.g. ASL-842).');
                     return;
                 }
+                showJoinFeedback('info', `Connecting to ${code}...`);
                 twoWayManager.joinRoom(code, currentRole);
             });
         }
@@ -851,38 +964,80 @@
             if (!msg) { joinFeedback.style.display = 'none'; return; }
             joinFeedback.style.display = 'block';
             joinFeedback.textContent = msg;
-            joinFeedback.style.color = type === 'error' ? '#f43f5e' : '#10b981';
+            joinFeedback.style.color = type === 'error' ? '#f43f5e' : (type === 'success' ? '#10b981' : '#38bdf8');
         }
 
         // Leave Room
         if (leaveRoomBtn) {
             leaveRoomBtn.addEventListener('click', () => {
                 twoWayManager.disconnect();
-                if (hostIdle && hostActive) {
-                    hostIdle.style.display = 'block';
-                    hostActive.style.display = 'none';
-                }
-                if (connBanner) connBanner.style.display = 'none';
+                updateRoomView(false);
             });
         }
 
         // State Change Listener
         twoWayManager.on('onStateChange', (state, msg) => {
             console.log(`[TwoWay UI] State: ${state} - ${msg}`);
-            if (connBanner && connStatusText) {
-                connBanner.style.display = 'flex';
-                connStatusText.textContent = msg;
-            }
             if (state === 'connected') {
+                updateRoomView(true);
                 showJoinFeedback('success', 'Connected successfully!');
             } else if (state === 'disconnected') {
+                updateRoomView(false);
                 showJoinFeedback(null, null);
+            } else if (state === 'error') {
+                showJoinFeedback('error', msg);
             }
         });
 
         twoWayManager.on('onError', (err) => {
             showJoinFeedback('error', err);
         });
+
+        // Auto-Join if URL contained ?room=CODE or ?code=CODE
+        if (twoWayManager.pendingRoomCode) {
+            console.log(`[TwoWay UI] Detected pending room parameter: ${twoWayManager.pendingRoomCode}`);
+            openModal();
+            if (joinInput) {
+                joinInput.value = twoWayManager.pendingRoomCode;
+            }
+            setTimeout(() => {
+                if (joinBtn && joinInput && joinInput.value.trim()) {
+                    console.log('[TwoWay UI] Auto-triggering room join from URL parameter');
+                    joinBtn.click();
+                } else if (twoWayManager.pendingRoomCode) {
+                    twoWayManager.joinRoom(twoWayManager.pendingRoomCode, currentRole);
+                }
+            }, 600);
+        }
+
+        // Hash navigation support: detector.html#two-way or #two-way-room
+        if (window.location.hash === '#two-way' || window.location.hash === '#two-way-room') {
+            openModal();
+        }
+        window.addEventListener('hashchange', () => {
+            if (window.location.hash === '#two-way' || window.location.hash === '#two-way-room') {
+                openModal();
+            }
+        });
+
+        // Send current camera sentence button listener
+        if (sendCurrentSignBtn) {
+            sendCurrentSignBtn.addEventListener('click', () => {
+                let sentenceToCommit = '';
+                const currentSentenceEl = document.getElementById('current-sentence');
+                if (currentSentenceEl && currentSentenceEl.textContent.trim()) {
+                    sentenceToCommit = currentSentenceEl.textContent.trim();
+                } else if (streamTokensBox && streamTokensBox.children.length > 0) {
+                    const tokens = Array.from(streamTokensBox.querySelectorAll('span')).map(s => s.textContent.replace(/^\[Word:\s*|\s*\]$/g, '').trim());
+                    sentenceToCommit = tokens.join(' ');
+                }
+
+                if (sentenceToCommit && sentenceToCommit !== '-' && sentenceToCommit !== '...' && sentenceToCommit !== 'Form signs in camera to compose sentence...') {
+                    twoWayManager.sendSign(sentenceToCommit);
+                    appendStreamToken(sentenceToCommit, 'word');
+                }
+            });
+        }
 
         // =====================================================================
         // Step 2: Signer Side - MediaPipe Shared Pipeline Integration
@@ -1181,13 +1336,15 @@
 
         if (copyTranscriptBtn) {
             copyTranscriptBtn.addEventListener('click', () => {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(twoWayManager.getTranscriptText()).then(() => {
-                        const orig = copyTranscriptBtn.textContent;
-                        copyTranscriptBtn.textContent = 'Copied!';
-                        setTimeout(() => copyTranscriptBtn.textContent = orig, 1800);
-                    });
-                }
+                copyTextSafe(twoWayManager.getTranscriptText()).then(() => {
+                    const orig = copyTranscriptText ? copyTranscriptText.textContent : copyTranscriptBtn.textContent;
+                    if (copyTranscriptText) copyTranscriptText.textContent = 'Copied!';
+                    else copyTranscriptBtn.textContent = 'Copied!';
+                    setTimeout(() => {
+                        if (copyTranscriptText) copyTranscriptText.textContent = orig;
+                        else copyTranscriptBtn.textContent = orig;
+                    }, 1800);
+                });
             });
         }
 
