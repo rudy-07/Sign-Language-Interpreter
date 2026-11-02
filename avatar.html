@@ -78,8 +78,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <!-- Puter.js for Client-Side Zero-Auth AI Sentence Simplification -->
-    <script src="https://js.puter.com/v2/"></script>
+    <!-- 3D Graphics Engine & Controls -->
 </head>
 
 <body>
@@ -373,7 +372,7 @@
                                         <span class="toggle-custom"></span>
                                         <span class="toggle-text">Fingerspell Only</span>
                                     </label>
-                                    <label class="avatar-toggle-label" title="Rewrite sentence using only available ASL lexicon signs (Puter.js AI)">
+                                    <label class="avatar-toggle-label" title="Rewrite sentence using only available ASL lexicon signs (Zero-Auth AI)">
                                         <input type="checkbox" id="toggle-ai-rewrite" class="avatar-checkbox">
                                         <span class="toggle-custom"></span>
                                         <span class="toggle-text">Simplify with AI</span>
@@ -453,6 +452,41 @@
                             <button type="button" class="example-chip" data-phrase="I love you">I love you</button>
                             <button type="button" class="example-chip" data-phrase="Where is water?">Where is water?</button>
                             <button type="button" class="example-chip" data-phrase="Peace">Peace</button>
+                        </div>
+                    </div>
+
+                    <!-- Pre-built ASL Sentence Library (110+ Categorized Sentences) -->
+                    <div class="avatar-sentence-library-sec" style="margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-subtle);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="avatar-sub-label" style="margin: 0;">PRE-BUILT SENTENCE LIBRARY</span>
+                                <span id="sentence-count-badge" class="badge" style="font-size: 0.68rem; background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-family: var(--font-mono); padding: 2px 6px; border-radius: 4px;">110 Sentences</span>
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <select id="sentence-category-select" class="two-way-select sm" style="font-size: 0.72rem; padding: 4px 8px; background: rgba(15, 23, 42, 0.6); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: 4px;">
+                                    <option value="all">All Categories</option>
+                                    <option value="Greetings and introductions">Greetings</option>
+                                    <option value="Daily routine">Daily Routine</option>
+                                    <option value="Family and friends">Family & Friends</option>
+                                    <option value="School and college">School & College</option>
+                                    <option value="Food and drinks">Food & Drinks</option>
+                                    <option value="Health and emergencies">Health & Emergencies</option>
+                                    <option value="Travel and directions">Travel & Directions</option>
+                                    <option value="Shopping and money">Shopping & Money</option>
+                                    <option value="Feelings and emotions">Feelings & Emotions</option>
+                                    <option value="Questions (who, what, where, when, why, how)">Questions</option>
+                                    <option value="Time, days, weather">Time & Weather</option>
+                                </select>
+                                <select id="sentence-difficulty-select" class="two-way-select sm" style="font-size: 0.72rem; padding: 4px 8px; background: rgba(15, 23, 42, 0.6); color: var(--text-primary); border: 1px solid var(--border-subtle); border-radius: 4px;">
+                                    <option value="all">All Difficulties</option>
+                                    <option value="beginner">Beginner</option>
+                                    <option value="intermediate">Intermediate</option>
+                                    <option value="advanced">Advanced</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="sentence-library-container" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
+                            <!-- Dynamically populated from data/sentences.json -->
                         </div>
                     </div>
                 </div>

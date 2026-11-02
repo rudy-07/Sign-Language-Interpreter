@@ -4467,24 +4467,52 @@ Rules:
 
             try {
                 let responseText = '';
-                if (typeof puter !== 'undefined' && puter.ai && puter.ai.chat) {
-                    responseText = await puter.ai.chat(prompt);
-                } else {
-                    const directRes = await fetch('https://text.pollinations.ai/', {
+
+                // 1. Try serverless Netlify proxy (zero-auth, server-side fetch)
+                try {
+                    const netlifyRes = await fetch('/.netlify/functions/chat', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            messages: [{ role: 'user', content: prompt }],
-                            seed: 42
+                            messages: [
+                                { role: 'system', content: 'You are an ASL grammar and vocabulary translator. Respond strictly with valid JSON.' },
+                                { role: 'user', content: prompt }
+                            ]
                         })
                     });
-                    if (directRes.ok) responseText = await directRes.text();
+                    if (netlifyRes.ok) {
+                        const data = await netlifyRes.json();
+                        if (data && data.reply) responseText = data.reply;
+                    }
+                } catch (_) {
+                    // Netlify functions unavailable on local static server
                 }
 
-                if (!responseText) return sentence;
+                // 2. Direct Pollinations fallback if Netlify proxy not active (e.g. static dev server)
+                if (!responseText) {
+                    try {
+                        const directRes = await fetch('https://text.pollinations.ai/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                messages: [{ role: 'user', content: prompt }],
+                                seed: 42
+                            })
+                        });
+                        if (directRes.ok) responseText = await directRes.text();
+                    } catch (_) {
+                        // Network error / Cloudflare WAF block
+                    }
+                }
+
+                if (!responseText) {
+                    return this.ruleBasedAslSimplify(sentence, candidateList);
+                }
 
                 const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-                if (!jsonMatch) return sentence;
+                if (!jsonMatch) {
+                    return this.ruleBasedAslSimplify(sentence, candidateList);
+                }
 
                 const parsed = JSON.parse(jsonMatch[0]);
                 if (parsed && typeof parsed.rewritten === 'string' && parsed.rewritten.trim()) {
@@ -4495,15 +4523,37 @@ Rules:
                             validCount++;
                         }
                     }
-                    if (validCount >= candidateWords.length * 0.7) {
+                    if (validCount >= candidateWords.length * 0.6) {
                         return parsed.rewritten.trim();
                     }
                 }
             } catch (err) {
-                console.warn('[Avatar AI] Simplification call failed:', err);
+                console.warn('[Avatar AI] Simplification call failed, using rule-based fallback:', err);
+                return this.ruleBasedAslSimplify(sentence, candidateList);
             }
 
-            return sentence;
+            return this.ruleBasedAslSimplify(sentence, candidateList);
+        }
+
+        ruleBasedAslSimplify(sentence, candidateList = []) {
+            if (!sentence) return '';
+            const stopWords = new Set(['a', 'an', 'the', 'is', 'are', 'was', 'were', 'am', 'be', 'been', 'being', 'do', 'does', 'did', 'to', 'of', 'for', 'in', 'on', 'at']);
+            const words = sentence.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+            const filtered = words.filter(w => !stopWords.has(w));
+            if (!filtered.length) return sentence;
+
+            const matched = filtered.map(w => {
+                const upper = w.toUpperCase();
+                if (candidateList.includes(upper)) return upper;
+                if (this.lexicon && this.lexicon.hasSign(w)) return upper;
+                if (this.lexicon && this.lexicon.lemmas && this.lexicon.lemmas.has(w)) {
+                    const lemma = this.lexicon.lemmas.get(w).toUpperCase();
+                    if (candidateList.includes(lemma)) return lemma;
+                }
+                return w;
+            });
+
+            return matched.join(' ');
         }
 
         renderGlossTimeline(tokens) {

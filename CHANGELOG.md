@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full longest-match resolution hierarchy: Multi-word phrase -> Exact gloss -> Lemma derivation -> Synonym mapping -> Numbers -> Fingerspelling fallback.
   - Linked `src/lexicon_service.js` directly to `avatar.html` with IndexedDB preloading and continuous bone stepping to eliminate animation stutter and frozen avatar frames.
   - Case-insensitive fingerspelling supporting authentic letter-by-letter manual alphabet fallback.
-- **Client-Side AI Sentence Simplification (Puter.js)**:
+- **Client-Side Zero-Auth AI Sentence Simplification**:
+  - Replaced Puter.js with serverless Netlify proxy & unauthenticated zero-auth AI endpoints.
   - Added optional "Simplify with AI" feature to rewrite complex English sentences using exclusively available whole-word sign glosses.
   - Strict JSON schema validation ensuring that 100% of returned glosses exist in the lexicon or are valid numbers/proper names.
   - Seamless fallback to the original sentence on timeout or invalid gloss output.

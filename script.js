@@ -1581,7 +1581,11 @@ if (speakSentenceBtn) {
             utterance.rate = 0.9;
             synth.speak(utterance);
 
-            // Local voice playback (Use Send to Room to share with partner)
+            // Also broadcast to connected Two-Way Room partner
+            if (window.twoWayManager && window.twoWayManager.isConnected) {
+                window.twoWayManager.sendSign(currentSentence.trim());
+                console.log('[TwoWay] Broadcasted sentence to partner:', currentSentence.trim());
+            }
         }
     });
 }
